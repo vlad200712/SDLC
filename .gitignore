@@ -1,0 +1,35 @@
+# Каталоги сборки Qt Creator и CMake в ОС Windows
+build/
+build-*/
+**/build/
+**/build-*/
+CMakeFiles/
+**/CMakeFiles/
+debug/
+release/
+cmake-build-*/
+
+# Временные пользовательские файлы настроек среды разработки и CMake
+*.pro.user
+*.pro.user.*
+CMakeLists.txt.user
+CMakeLists.txt.user.*
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+.qtc_clangd/
+.qtcreator/
+.vscode/
+
+# Скомпилированные объектные, промежуточные, манифесты и исполняемые файлы Windows
+*.o
+*.obj
+*.exe
+*.exe.manifest
+*.dll
+*.app
+*.out
+Makefile*
+moc_*
+ui_*.h
+qrc_*.cpp
