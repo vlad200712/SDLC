@@ -1,24 +1,25 @@
-// Экран регистрации нового клиента СТО. Требования: REQ-FUNC-001, REQ-FUNC-002, REQ-SEC-001, REQ-COMP-003.
+// Упрощённый ч/б макет экрана регистрации нового клиента СТО.
+// Требования: REQ-FUNC-001, REQ-FUNC-002, REQ-SEC-001, REQ-COMP-003.
 package UiRegister {
     private import UiLibrary::*;
 
     part registerScreen : Screen {
-        attribute :>> width = 480;
-        attribute :>> height = 840;
-        attribute :>> caption = "AutoService · Регистрация клиента";
+        attribute :>> width = 400;
+        attribute :>> height = 520;
+        attribute :>> caption = "AutoService - Регистрация";
 
-        part heading : Heading { attribute :>> posX = 24; attribute :>> posY = 64; attribute :>> width = 432; attribute :>> height = 32; attribute :>> caption = "Создание учётной записи клиента"; }
+        part heading : Heading { attribute :>> posX = 20; attribute :>> posY = 50; attribute :>> width = 360; attribute :>> height = 22; attribute :>> caption = "Регистрация клиента СТО"; }
 
-        part nameField : TextField { attribute :>> posX = 24; attribute :>> posY = 114; attribute :>> width = 432; attribute :>> height = 46; attribute :>> caption = "ФИО клиента"; attribute :>> subcaption = "Кожемякин Владислав Олегович"; }
-        part phoneField : TextField { attribute :>> posX = 24; attribute :>> posY = 186; attribute :>> width = 432; attribute :>> height = 46; attribute :>> caption = "Номер телефона"; attribute :>> subcaption = "+375 (29) 123-45-67"; }
-        part emailField : TextField { attribute :>> posX = 24; attribute :>> posY = 258; attribute :>> width = 432; attribute :>> height = 46; attribute :>> caption = "Email"; attribute :>> subcaption = "vlad@example.by"; }
-        part passField : TextField { attribute :>> posX = 24; attribute :>> posY = 330; attribute :>> width = 432; attribute :>> height = 46; attribute :>> caption = "Пароль (не менее 8 символов)"; attribute :>> subcaption = "••••••••••••"; }
-        part passConfirmField : TextField { attribute :>> posX = 24; attribute :>> posY = 402; attribute :>> width = 432; attribute :>> height = 46; attribute :>> caption = "Повторите пароль"; attribute :>> subcaption = "••••••••••••"; }
+        part nameField : TextField { attribute :>> posX = 20; attribute :>> posY = 96; attribute :>> width = 360; attribute :>> height = 34; attribute :>> caption = "ФИО клиента"; attribute :>> subcaption = "Кожемякин В. О."; }
+        part phoneField : TextField { attribute :>> posX = 20; attribute :>> posY = 152; attribute :>> width = 360; attribute :>> height = 34; attribute :>> caption = "Телефон"; attribute :>> subcaption = "+375 (29) 123-45-67"; }
+        part emailField : TextField { attribute :>> posX = 20; attribute :>> posY = 208; attribute :>> width = 360; attribute :>> height = 34; attribute :>> caption = "Email"; attribute :>> subcaption = "vlad@example.by"; }
+        part passField : TextField { attribute :>> posX = 20; attribute :>> posY = 264; attribute :>> width = 360; attribute :>> height = 34; attribute :>> caption = "Пароль (не менее 8 символов)"; attribute :>> subcaption = "********"; }
+        part passConfirmField : TextField { attribute :>> posX = 20; attribute :>> posY = 320; attribute :>> width = 360; attribute :>> height = 34; attribute :>> caption = "Повторите пароль"; attribute :>> subcaption = "********"; }
 
-        part consentRow : CheckRow { attribute :>> posX = 24; attribute :>> posY = 474; attribute :>> width = 432; attribute :>> height = 44; attribute :>> caption = "[✓] Согласие на обработку персональных данных"; attribute :>> tone = "normal"; }
-        part policyNote : Label { attribute :>> posX = 24; attribute :>> posY = 530; attribute :>> width = 432; attribute :>> height = 44; attribute :>> caption = "Регистрация доступна только для роли «Клиент СТО».\nУчётные записи персонала создаются администратором."; attribute :>> tone = "muted"; }
+        part consentRow : CheckRow { attribute :>> posX = 20; attribute :>> posY = 370; attribute :>> width = 360; attribute :>> height = 34; attribute :>> caption = "[x] Согласие на обработку ПД (Закон РБ 99-З)"; attribute :>> tone = "selected"; }
+        part roleNote : Label { attribute :>> posX = 20; attribute :>> posY = 412; attribute :>> width = 360; attribute :>> height = 20; attribute :>> caption = "* Самостоятельная регистрация только для Клиента СТО"; }
 
-        part submitBtn : SuccessButton { attribute :>> posX = 24; attribute :>> posY = 602; attribute :>> width = 432; attribute :>> height = 50; attribute :>> caption = "ЗАРЕГИСТРИРОВАТЬСЯ"; }
-        part backBtn : Button { attribute :>> posX = 24; attribute :>> posY = 668; attribute :>> width = 432; attribute :>> height = 44; attribute :>> caption = "← Назад ко входу"; }
+        part submitBtn : PrimaryButton { attribute :>> posX = 20; attribute :>> posY = 438; attribute :>> width = 360; attribute :>> height = 36; attribute :>> caption = "Зарегистрироваться"; }
+        part backBtn : Button { attribute :>> posX = 20; attribute :>> posY = 480; attribute :>> width = 360; attribute :>> height = 30; attribute :>> caption = "Назад ко входу"; }
     }
 }

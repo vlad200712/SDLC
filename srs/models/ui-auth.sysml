@@ -1,34 +1,29 @@
-// Экран входа и выбора роли (RBAC). Требования: REQ-FUNC-001, REQ-FUNC-003, REQ-SEC-001, REQ-SEC-003, REQ-SEC-005.
+// Упрощённый ч/б макет экрана входа и ролей (RBAC).
+// Требования: REQ-FUNC-001, REQ-FUNC-003, REQ-FUNC-004, REQ-SEC-003, REQ-SEC-005.
 package UiAuth {
     private import UiLibrary::*;
 
     part authScreen : Screen {
-        attribute :>> width = 480;
-        attribute :>> height = 920;
-        attribute :>> caption = "AutoService · 1. Вход и роли (RBAC)";
+        attribute :>> width = 400;
+        attribute :>> height = 500;
+        attribute :>> caption = "AutoService - 1. Вход и роли";
 
-        part clientTab : TabActive { attribute :>> posX = 24; attribute :>> posY = 64; attribute :>> width = 216; attribute :>> height = 44; attribute :>> caption = "Клиент СТО"; }
-        part staffTab : TabInactive { attribute :>> posX = 240; attribute :>> posY = 64; attribute :>> width = 216; attribute :>> height = 44; attribute :>> caption = "Мастер / Админ"; }
+        part clientTab : TabActive { attribute :>> posX = 20; attribute :>> posY = 52; attribute :>> width = 176; attribute :>> height = 34; attribute :>> caption = "Клиент СТО"; }
+        part staffTab : TabInactive { attribute :>> posX = 204; attribute :>> posY = 52; attribute :>> width = 176; attribute :>> height = 34; attribute :>> caption = "Мастер / Админ"; }
 
-        part clientHeading : Heading { attribute :>> posX = 24; attribute :>> posY = 128; attribute :>> width = 432; attribute :>> height = 28; attribute :>> caption = "Вход для автовладельца:"; }
-        part phoneField : TextField { attribute :>> posX = 24; attribute :>> posY = 166; attribute :>> width = 432; attribute :>> height = 46; attribute :>> caption = "Телефон / Email"; attribute :>> subcaption = "+375 (29) 123-45-67"; }
-        part passField : TextField { attribute :>> posX = 24; attribute :>> posY = 236; attribute :>> width = 432; attribute :>> height = 46; attribute :>> caption = "Пароль"; attribute :>> subcaption = "••••••••••••"; }
-        part clientLoginBtn : SuccessButton { attribute :>> posX = 24; attribute :>> posY = 302; attribute :>> width = 432; attribute :>> height = 48; attribute :>> caption = "ВОЙТИ КАК КЛИЕНТ"; }
-        part registerBtn : Button { attribute :>> posX = 24; attribute :>> posY = 362; attribute :>> width = 432; attribute :>> height = 44; attribute :>> caption = "Регистрация нового клиента"; attribute :>> tone = "primary-outline"; }
+        part loginHeading : Heading { attribute :>> posX = 20; attribute :>> posY = 102; attribute :>> width = 360; attribute :>> height = 22; attribute :>> caption = "Вход в систему"; }
+        part phoneField : TextField { attribute :>> posX = 20; attribute :>> posY = 148; attribute :>> width = 360; attribute :>> height = 36; attribute :>> caption = "Телефон / Email или логин"; attribute :>> subcaption = "+375 (29) 123-45-67"; }
+        part passField : TextField { attribute :>> posX = 20; attribute :>> posY = 208; attribute :>> width = 360; attribute :>> height = 36; attribute :>> caption = "Пароль"; attribute :>> subcaption = "********"; }
+
+        part loginBtn : PrimaryButton { attribute :>> posX = 20; attribute :>> posY = 260; attribute :>> width = 360; attribute :>> height = 38; attribute :>> caption = "Войти"; }
+        part registerBtn : Button { attribute :>> posX = 20; attribute :>> posY = 308; attribute :>> width = 360; attribute :>> height = 34; attribute :>> caption = "Регистрация нового клиента"; }
 
         part staffCard : Card {
-            attribute :>> posX = 24; attribute :>> posY = 432; attribute :>> width = 432; attribute :>> height = 390;
-            attribute :>> caption = "Служебный вход (Персонал СТО):";
-            attribute :>> tone = "warning";
+            attribute :>> posX = 20; attribute :>> posY = 360; attribute :>> width = 360; attribute :>> height = 116;
+            attribute :>> caption = "Служебный вход и защита (JWT)";
 
-            part staffLoginField : TextField { attribute :>> posX = 16; attribute :>> posY = 48; attribute :>> width = 400; attribute :>> height = 46; attribute :>> caption = "Корпоративный логин"; attribute :>> subcaption = "master_box2@autoservice.by"; }
-            part staffPassField : TextField { attribute :>> posX = 16; attribute :>> posY = 122; attribute :>> width = 400; attribute :>> height = 46; attribute :>> caption = "Служебный пароль"; attribute :>> subcaption = "••••••••••"; }
-            part roleLabel : Label { attribute :>> posX = 16; attribute :>> posY = 192; attribute :>> width = 400; attribute :>> height = 28; attribute :>> caption = "Роль: [ Мастер СТО | Админ СТО ]"; }
-            part lockWarning : Label { attribute :>> posX = 16; attribute :>> posY = 228; attribute :>> width = 400; attribute :>> height = 26; attribute :>> caption = "Блокировка после 5 неудачных попыток (15 мин)"; attribute :>> tone = "danger"; }
-            part staffLoginBtn : WarningButton { attribute :>> posX = 16; attribute :>> posY = 270; attribute :>> width = 400; attribute :>> height = 48; attribute :>> caption = "ВХОД ПЕРСОНАЛА (JWT)"; }
-            part staffNote : Label { attribute :>> posX = 16; attribute :>> posY = 336; attribute :>> width = 400; attribute :>> height = 28; attribute :>> caption = "* Логины мастеров выдаются Администратором СТО"; attribute :>> tone = "muted"; }
+            part staffNote : Label { attribute :>> posX = 12; attribute :>> posY = 34; attribute :>> width = 336; attribute :>> height = 34; attribute :>> caption = "Персонал (Мастер/Админ): корпоративный логин\nвыдаётся Администратором СТО."; }
+            part lockNote : Label { attribute :>> posX = 12; attribute :>> posY = 76; attribute :>> width = 336; attribute :>> height = 24; attribute :>> caption = "Защита: блок на 15 мин после 5 неверных попыток."; }
         }
-
-        part apiStatus : Badge { attribute :>> posX = 24; attribute :>> posY = 844; attribute :>> width = 200; attribute :>> height = 34; attribute :>> caption = "Cloud API доступен"; attribute :>> tone = "normal"; }
     }
 }

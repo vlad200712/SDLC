@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Отрисовка моделей SysMLv2 из папки srs/models в PNG (папка srs/images).
+    Упрощённая чёрно-белая отрисовка моделей SysMLv2 из папки srs/models в PNG (srs/images).
 .DESCRIPTION
     Запуск из корня репозитория:
         powershell -ExecutionPolicy Bypass -File srs/models/render.ps1
@@ -18,33 +18,18 @@ if (-not (Test-Path $OutDir)) {
     New-Item -ItemType Directory -Path $OutDir | Out-Null
 }
 
-# Палитра оформления макетов
-$C_BG       = [System.Drawing.Color]::FromArgb(255, 255, 255)
-$C_TITLE    = [System.Drawing.Color]::FromArgb(30, 64, 175)
-$C_CTX_HDR  = [System.Drawing.Color]::FromArgb(52, 58, 70)
-$C_GOLD     = [System.Drawing.Color]::FromArgb(253, 224, 71)
-$C_INK      = [System.Drawing.Color]::FromArgb(33, 37, 41)
-$C_MUTED    = [System.Drawing.Color]::FromArgb(100, 116, 139)
-$C_LINE     = [System.Drawing.Color]::FromArgb(148, 163, 184)
-$C_PANEL    = [System.Drawing.Color]::FromArgb(248, 250, 252)
-$C_PRIMARY  = [System.Drawing.Color]::FromArgb(37, 99, 235)
-$C_SUCCESS  = [System.Drawing.Color]::FromArgb(22, 163, 74)
-$C_SUCCESS_BG = [System.Drawing.Color]::FromArgb(236, 253, 245)
-$C_DANGER   = [System.Drawing.Color]::FromArgb(220, 38, 38)
-$C_DANGER_BG = [System.Drawing.Color]::FromArgb(254, 242, 242)
-$C_WARN     = [System.Drawing.Color]::FromArgb(217, 119, 6)
-$C_WARN_BG  = [System.Drawing.Color]::FromArgb(255, 251, 235)
-$C_INFO_BG  = [System.Drawing.Color]::FromArgb(239, 246, 255)
-$C_PURPLE   = [System.Drawing.Color]::FromArgb(190, 24, 93)
-$C_PURPLE_BG = [System.Drawing.Color]::FromArgb(253, 242, 248)
-$C_EXT_BG   = [System.Drawing.Color]::FromArgb(241, 245, 249)
-$C_DISABLED = [System.Drawing.Color]::FromArgb(226, 232, 240)
+# Строго чёрно-белая / монохромная палитра (вайрфреймы)
+$C_WHITE   = [System.Drawing.Color]::FromArgb(255, 255, 255)
+$C_BLACK   = [System.Drawing.Color]::FromArgb(0, 0, 0)
+$C_DARK    = [System.Drawing.Color]::FromArgb(34, 34, 34)
+$C_MUTED   = [System.Drawing.Color]::FromArgb(90, 90, 90)
+$C_GRAY_BG = [System.Drawing.Color]::FromArgb(236, 236, 236)
+$C_BOX_BG  = [System.Drawing.Color]::FromArgb(247, 247, 247)
 
 function Parse-SysmlModel {
     param([string]$FilePath)
 
     $text = Get-Content -Path $FilePath -Raw -Encoding UTF8
-    # Удаление однострочных комментариев
     $lines = $text -split "`r?`n"
     $cleanLines = foreach ($ln in $lines) {
         $idx = $ln.IndexOf("//")
@@ -58,8 +43,6 @@ function Parse-SysmlModel {
 
     $i = 0
     $len = $clean.Length
-
-    # Токенизация на строки и блоки { }
     $tokens = New-Object System.Collections.ArrayList
     $sb = New-Object System.Text.StringBuilder
     $inStr = $false
@@ -171,31 +154,6 @@ function Parse-SysmlModel {
     return @{ Roots = $rootNodes; Connections = $connections }
 }
 
-function Draw-RoundedRect {
-    param(
-        [System.Drawing.Graphics]$G,
-        [float]$X, [float]$Y, [float]$W, [float]$H, [float]$Radius,
-        [System.Drawing.Brush]$FillBrush = $null,
-        [System.Drawing.Pen]$BorderPen = $null
-    )
-    $path = New-Object System.Drawing.Drawing2D.GraphicsPath
-    $d = $Radius * 2
-    if ($d -gt $W) { $d = $W }
-    if ($d -gt $H) { $d = $H }
-    if ($d -le 0) {
-        $path.AddRectangle([System.Drawing.RectangleF]::new($X, $Y, $W, $H))
-    } else {
-        $path.AddArc($X, $Y, $d, $d, 180, 90)
-        $path.AddArc($X + $W - $d, $Y, $d, $d, 270, 90)
-        $path.AddArc($X + $W - $d, $Y + $H - $d, $d, $d, 0, 90)
-        $path.AddArc($X, $Y + $H - $d, $d, $d, 90, 90)
-        $path.CloseFigure()
-    }
-    if ($null -ne $FillBrush) { $G.FillPath($FillBrush, $path) }
-    if ($null -ne $BorderPen) { $G.DrawPath($BorderPen, $path) }
-    $path.Dispose()
-}
-
 function Render-ContextDiagram {
     param($Model, [string]$OutPath)
 
@@ -206,41 +164,44 @@ function Render-ContextDiagram {
     $bmp = New-Object System.Drawing.Bitmap($W, $H)
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
-    $g.Clear($C_BG)
+    $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
+    $g.Clear($C_WHITE)
 
-    $fHdr   = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
-    $fStamp = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
-    $fStereo = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Regular)
-    $fTitle = New-Object System.Drawing.Font("Segoe UI", 13, [System.Drawing.FontStyle]::Bold)
-    $fSub   = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Regular)
-    $fActor = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Regular)
-    $fLink  = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Regular)
+    $fHdr    = New-Object System.Drawing.Font("Arial", 13, [System.Drawing.FontStyle]::Bold)
+    $fStamp  = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Regular)
+    $fStereo = New-Object System.Drawing.Font("Arial", 9.5, [System.Drawing.FontStyle]::Regular)
+    $fTitle  = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
+    $fSub    = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Regular)
+    $fActor  = New-Object System.Drawing.Font("Arial", 11, [System.Drawing.FontStyle]::Regular)
+    $fLink   = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Regular)
 
-    $bHdr = New-Object System.Drawing.SolidBrush($C_CTX_HDR)
-    $bWhite = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
-    $bGold = New-Object System.Drawing.SolidBrush($C_GOLD)
-    $bInk = New-Object System.Drawing.SolidBrush($C_INK)
+    $bWhite = New-Object System.Drawing.SolidBrush($C_WHITE)
+    $bBlack = New-Object System.Drawing.SolidBrush($C_BLACK)
     $bMuted = New-Object System.Drawing.SolidBrush($C_MUTED)
-    $bPanel = New-Object System.Drawing.SolidBrush($C_PANEL)
-    $bExt = New-Object System.Drawing.SolidBrush($C_EXT_BG)
+    $bBoxBg = New-Object System.Drawing.SolidBrush($C_BOX_BG)
+    $bGray  = New-Object System.Drawing.SolidBrush($C_GRAY_BG)
 
-    $pBox = New-Object System.Drawing.Pen($C_INK, 1.8)
-    $pLink = New-Object System.Drawing.Pen($C_INK, 1.5)
+    $pFrame = New-Object System.Drawing.Pen($C_BLACK, 1.5)
+    $pBox   = New-Object System.Drawing.Pen($C_BLACK, 1.5)
+    $pDash  = New-Object System.Drawing.Pen($C_BLACK, 1.5)
+    $pDash.DashStyle = [System.Drawing.Drawing2D.DashStyle]::Dash
+    $pLink  = New-Object System.Drawing.Pen($C_BLACK, 1.3)
 
-    # Верхний заголовок
-    $g.FillRectangle($bHdr, 0, 0, $W, 44)
-    $g.DrawString([string]$screen.Attrs.caption, $fHdr, $bWhite, 16, 10)
+    # Ч/б шапка схемы
+    $g.DrawRectangle($pFrame, 0, 0, $W - 1, $H - 1)
+    $g.FillRectangle($bGray, 1, 1, $W - 2, 36)
+    $g.DrawLine($pFrame, 0, 37, $W, 37)
+    $g.DrawString([string]$screen.Attrs.caption, $fHdr, $bBlack, 14, 9)
+
     $sfRight = New-Object System.Drawing.StringFormat
     $sfRight.Alignment = [System.Drawing.StringAlignment]::Far
-    $g.DrawString("Макет, не итоговый вид", $fStamp, $bGold, ($W - 16), 13, $sfRight)
+    $g.DrawString("Макет, не итоговый вид", $fStamp, $bMuted, ($W - 14), 11, $sfRight)
 
     $sfCenter = New-Object System.Drawing.StringFormat
     $sfCenter.Alignment = [System.Drawing.StringAlignment]::Center
 
     $boundsMap = @{}
 
-    # Сбор координат всех элементов
     function Collect-Blocks {
         param($Node, [int]$OffX, [int]$OffY, [string]$Prefix)
         foreach ($ch in $Node.Children) {
@@ -259,17 +220,15 @@ function Render-ContextDiagram {
     }
     Collect-Blocks -Node $screen -OffX 0 -OffY 0 -Prefix ""
 
-    # Сначала рисуем родительские/контейнерные блоки (содержащие Children), затем вложенные
     foreach ($entry in $boundsMap.Values) {
         if ($entry.Kind -eq "Block" -and $entry.Node.Children.Count -gt 0) {
-            $g.FillRectangle($bPanel, $entry.X, $entry.Y, $entry.W, $entry.H)
+            $g.FillRectangle($bBoxBg, $entry.X, $entry.Y, $entry.W, $entry.H)
             $g.DrawRectangle($pBox, $entry.X, $entry.Y, $entry.W, $entry.H)
             $g.DrawString("«система»", $fStereo, $bMuted, $entry.CX, $entry.Y + 14, $sfCenter)
-            $g.DrawString([string]$entry.Node.Attrs.caption, $fTitle, $bInk, $entry.CX, $entry.Y + 34, $sfCenter)
+            $g.DrawString([string]$entry.Node.Attrs.caption, $fTitle, $bBlack, $entry.CX, $entry.Y + 34, $sfCenter)
         }
     }
 
-    # Связи (до рисования внутренних блоков, чтобы линии шли к границам аккуратно)
     foreach ($conn in $Model.Connections) {
         $a = $boundsMap[$conn.From]
         $b = $boundsMap[$conn.To]
@@ -279,7 +238,7 @@ function Render-ContextDiagram {
         $x2 = [float]$b.CX; $y2 = [float]$b.CY
 
         if ($a.Kind -eq "Actor") {
-            $x1 = [float]($a.X + 35)
+            $x1 = [float]($a.X + 26)
             $y1 = [float]($a.Y + 45)
         }
         $g.DrawLine($pLink, $x1, $y1, $x2, $y2)
@@ -289,37 +248,37 @@ function Render-ContextDiagram {
             $my = ($y1 + $y2) / 2
             $sz = $g.MeasureString($conn.Caption, $fLink)
             $g.FillRectangle($bWhite, $mx - ($sz.Width / 2) - 4, $my - ($sz.Height / 2) - 2, $sz.Width + 8, $sz.Height + 4)
-            $g.DrawString($conn.Caption, $fLink, $bInk, $mx, $my - ($sz.Height / 2), $sfCenter)
+            $g.DrawString($conn.Caption, $fLink, $bBlack, $mx, $my - ($sz.Height / 2), $sfCenter)
         }
     }
 
-    # Листовые блоки и акторы
     foreach ($entry in $boundsMap.Values) {
         if ($entry.Kind -eq "Actor") {
             $cx = $entry.X
             $cy = $entry.Y
-            $g.FillEllipse($bWhite, $cx - 14, $cy, 28, 28)
-            $g.DrawEllipse($pBox, $cx - 14, $cy, 28, 28)
-            $g.DrawLine($pBox, $cx, $cy + 28, $cx, $cy + 66)
-            $g.DrawLine($pBox, $cx - 22, $cy + 40, $cx + 22, $cy + 40)
-            $g.DrawLine($pBox, $cx, $cy + 66, $cx - 18, $cy + 94)
-            $g.DrawLine($pBox, $cx, $cy + 66, $cx + 18, $cy + 94)
-            $g.DrawString([string]$entry.Node.Attrs.caption, $fActor, $bInk, $cx, $cy + 100, $sfCenter)
+            $g.FillEllipse($bWhite, $cx - 13, $cy, 26, 26)
+            $g.DrawEllipse($pBox, $cx - 13, $cy, 26, 26)
+            $g.DrawLine($pBox, $cx, $cy + 26, $cx, $cy + 64)
+            $g.DrawLine($pBox, $cx - 20, $cy + 38, $cx + 20, $cy + 38)
+            $g.DrawLine($pBox, $cx, $cy + 64, $cx - 16, $cy + 92)
+            $g.DrawLine($pBox, $cx, $cy + 64, $cx + 16, $cy + 92)
+            $g.DrawString([string]$entry.Node.Attrs.caption, $fActor, $bBlack, $cx, $cy + 98, $sfCenter)
         } elseif ($entry.Node.Children.Count -eq 0) {
             $isExt = ($entry.Node.Attrs.tone -eq "external")
-            $fill = if ($isExt) { $bExt } else { $bWhite }
+            $fill = if ($isExt) { $bGray } else { $bWhite }
+            $pen  = if ($isExt) { $pDash } else { $pBox }
             $stereo = if ($isExt) { "«внешний элемент»" } else { "«часть»" }
             $g.FillRectangle($fill, $entry.X, $entry.Y, $entry.W, $entry.H)
-            $g.DrawRectangle($pBox, $entry.X, $entry.Y, $entry.W, $entry.H)
+            $g.DrawRectangle($pen, $entry.X, $entry.Y, $entry.W, $entry.H)
 
             $sub = [string]$entry.Node.Attrs.subcaption
             if ($sub -ne "") {
                 $g.DrawString($stereo, $fStereo, $bMuted, $entry.CX, $entry.Y + 24, $sfCenter)
-                $g.DrawString([string]$entry.Node.Attrs.caption, $fTitle, $bInk, $entry.CX, $entry.Y + 48, $sfCenter)
+                $g.DrawString([string]$entry.Node.Attrs.caption, $fTitle, $bBlack, $entry.CX, $entry.Y + 48, $sfCenter)
                 $g.DrawString($sub, $fSub, $bMuted, $entry.CX, $entry.Y + 76, $sfCenter)
             } else {
                 $g.DrawString($stereo, $fStereo, $bMuted, $entry.CX, $entry.Y + 34, $sfCenter)
-                $g.DrawString([string]$entry.Node.Attrs.caption, $fTitle, $bInk, $entry.CX, $entry.Y + 58, $sfCenter)
+                $g.DrawString([string]$entry.Node.Attrs.caption, $fTitle, $bBlack, $entry.CX, $entry.Y + 58, $sfCenter)
             }
         }
     }
@@ -337,42 +296,28 @@ function Render-UiScreen {
 
     $bmp = New-Object System.Drawing.Bitmap($W, $H)
     $g = [System.Drawing.Graphics]::FromImage($bmp)
-    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
-    $g.Clear($C_BG)
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::None
+    $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
+    $g.Clear($C_WHITE)
 
-    $fHdr     = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
-    $fStamp   = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
-    $fHeading = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
-    $fBody    = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Regular)
-    $fBold    = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-    $fSmall   = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Regular)
-    $fMono    = New-Object System.Drawing.Font("Consolas", 9.5, [System.Drawing.FontStyle]::Regular)
+    # Обычный базовый шрифт Arial без декоративных стилей
+    $fHdr     = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
+    $fStamp   = New-Object System.Drawing.Font("Arial", 8, [System.Drawing.FontStyle]::Regular)
+    $fHeading = New-Object System.Drawing.Font("Arial", 10.5, [System.Drawing.FontStyle]::Bold)
+    $fBody    = New-Object System.Drawing.Font("Arial", 9.5, [System.Drawing.FontStyle]::Regular)
+    $fBold    = New-Object System.Drawing.Font("Arial", 9.5, [System.Drawing.FontStyle]::Bold)
+    $fSmall   = New-Object System.Drawing.Font("Arial", 8.5, [System.Drawing.FontStyle]::Regular)
 
-    $bTitleBar = New-Object System.Drawing.SolidBrush($C_TITLE)
-    $bWhite    = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
-    $bGold     = New-Object System.Drawing.SolidBrush($C_GOLD)
-    $bInk      = New-Object System.Drawing.SolidBrush($C_INK)
-    $bMuted    = New-Object System.Drawing.SolidBrush($C_MUTED)
-    $bPanel    = New-Object System.Drawing.SolidBrush($C_PANEL)
-    $bPrimary  = New-Object System.Drawing.SolidBrush($C_PRIMARY)
-    $bSuccess  = New-Object System.Drawing.SolidBrush($C_SUCCESS)
-    $bSuccessBg = New-Object System.Drawing.SolidBrush($C_SUCCESS_BG)
-    $bDanger   = New-Object System.Drawing.SolidBrush($C_DANGER)
-    $bDangerBg = New-Object System.Drawing.SolidBrush($C_DANGER_BG)
-    $bWarn     = New-Object System.Drawing.SolidBrush($C_WARN)
-    $bWarnBg   = New-Object System.Drawing.SolidBrush($C_WARN_BG)
-    $bInfoBg   = New-Object System.Drawing.SolidBrush($C_INFO_BG)
-    $bPurple   = New-Object System.Drawing.SolidBrush($C_PURPLE)
-    $bPurpleBg = New-Object System.Drawing.SolidBrush($C_PURPLE_BG)
-    $bDisabled = New-Object System.Drawing.SolidBrush($C_DISABLED)
+    $bWhite  = New-Object System.Drawing.SolidBrush($C_WHITE)
+    $bBlack  = New-Object System.Drawing.SolidBrush($C_BLACK)
+    $bDark   = New-Object System.Drawing.SolidBrush($C_DARK)
+    $bMuted  = New-Object System.Drawing.SolidBrush($C_MUTED)
+    $bGrayBg = New-Object System.Drawing.SolidBrush($C_GRAY_BG)
+    $bBoxBg  = New-Object System.Drawing.SolidBrush($C_BOX_BG)
 
-    $pLine     = New-Object System.Drawing.Pen($C_LINE, 1.3)
-    $pPrimary  = New-Object System.Drawing.Pen($C_PRIMARY, 1.6)
-    $pSuccess  = New-Object System.Drawing.Pen($C_SUCCESS, 1.6)
-    $pDanger   = New-Object System.Drawing.Pen($C_DANGER, 1.6)
-    $pWarn     = New-Object System.Drawing.Pen($C_WARN, 1.6)
-    $pPurple   = New-Object System.Drawing.Pen($C_PURPLE, 1.6)
+    $pThin   = New-Object System.Drawing.Pen($C_BLACK, 1)
+    $pThick  = New-Object System.Drawing.Pen($C_BLACK, 2)
+    $pMuted  = New-Object System.Drawing.Pen($C_MUTED, 1)
 
     $sfCenter = New-Object System.Drawing.StringFormat
     $sfCenter.Alignment = [System.Drawing.StringAlignment]::Center
@@ -385,10 +330,16 @@ function Render-UiScreen {
     $sfRightMid.Alignment = [System.Drawing.StringAlignment]::Far
     $sfRightMid.LineAlignment = [System.Drawing.StringAlignment]::Center
 
-    # Заголовок окна (макет)
-    $g.FillRectangle($bTitleBar, 0, 0, $W, 44)
-    $g.DrawString([string]$screen.Attrs.caption, $fHdr, $bWhite, 14, 12)
-    $g.DrawString("Макет, не итоговый вид", $fStamp, $bGold, ($W - 12), 14, $sfRight)
+    $sfLeftMid = New-Object System.Drawing.StringFormat
+    $sfLeftMid.Alignment = [System.Drawing.StringAlignment]::Near
+    $sfLeftMid.LineAlignment = [System.Drawing.StringAlignment]::Center
+
+    # Внешняя ч/б рамка экрана и шапка макета
+    $g.DrawRectangle($pThin, 0, 0, $W - 1, $H - 1)
+    $g.FillRectangle($bGrayBg, 1, 1, $W - 2, 36)
+    $g.DrawLine($pThin, 0, 37, $W, 37)
+    $g.DrawString([string]$screen.Attrs.caption, $fHdr, $bBlack, 10, 10)
+    $g.DrawString("Макет, не итоговый вид", $fStamp, $bMuted, ($W - 10), 12, $sfRight)
 
     function Draw-Node {
         param($Node, [int]$OffX, [int]$OffY)
@@ -402,122 +353,97 @@ function Render-UiScreen {
 
         switch ($Node.Type) {
             "Card" {
-                $bg = $bPanel; $pen = $pLine; $capBrush = $bInk
-                if ($tone -eq "info") { $bg = $bInfoBg; $pen = $pPrimary; $capBrush = $bPrimary }
-                elseif ($tone -eq "warning") { $bg = $bWarnBg; $pen = $pWarn; $capBrush = $bWarn }
-                elseif ($tone -eq "danger") { $bg = $bDangerBg; $pen = $pDanger; $capBrush = $bDanger }
-                elseif ($tone -eq "purple") { $bg = $bPurpleBg; $pen = $pPurple; $capBrush = $bPurple }
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 10 -FillBrush $bg -BorderPen $pen
+                $g.FillRectangle($bWhite, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
                 if ($cap -ne "") {
-                    $g.DrawString($cap, $fBold, $capBrush, ($x + 14), ($y + 12))
+                    $g.FillRectangle($bGrayBg, $x + 1, $y + 1, $w - 2, 23)
+                    $g.DrawLine($pThin, $x, $y + 24, $x + $w, $y + 24)
+                    $g.DrawString($cap, $fBold, $bBlack, ($x + 8), ($y + 4))
                 }
             }
-            "Panel" {
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bPanel -BorderPen $pLine
-            }
             "TabActive" {
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bPrimary -BorderPen $pPrimary
+                $g.FillRectangle($bDark, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
                 $g.DrawString($cap, $fBold, $bWhite, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
             }
             "TabInactive" {
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bPanel -BorderPen $pLine
-                $g.DrawString($cap, $fBody, $bMuted, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
+                $g.FillRectangle($bWhite, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
+                $g.DrawString($cap, $fBody, $bBlack, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
             }
             "Heading" {
-                $br = if ($tone -eq "normal") { $bSuccess } elseif ($tone -eq "primary") { $bPrimary } else { $bInk }
-                $g.DrawString($cap, $fHeading, $br, $x, $y)
+                $g.DrawString($cap, $fHeading, $bBlack, $x, $y)
             }
             "Label" {
-                $br = $bInk
-                if ($tone -eq "muted") { $br = $bMuted }
-                elseif ($tone -eq "danger") { $br = $bDanger }
-                elseif ($tone -eq "normal") { $br = $bSuccess }
-                elseif ($tone -eq "primary") { $br = $bPrimary }
-                elseif ($tone -eq "purple") { $br = $bPurple }
-                $g.DrawString($cap, $fBody, $br, [System.Drawing.RectangleF]::new($x, $y, $w, $h + 12))
-            }
-            "Mono" {
-                $g.DrawString($cap, $fMono, $bMuted, $x, $y)
+                $g.DrawString($cap, $fBody, $bBlack, [System.Drawing.RectangleF]::new($x, $y, $w, $h + 10))
             }
             "TextField" {
-                $g.DrawString($cap, $fSmall, $bMuted, $x, ($y - 18))
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bWhite -BorderPen $pLine
-                $g.DrawString($sub, $fBody, $bInk, ($x + 12), ($y + 13))
+                $g.DrawString($cap, $fSmall, $bBlack, $x, ($y - 16))
+                $g.FillRectangle($bWhite, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
+                $g.DrawString($sub, $fBody, $bMuted, [System.Drawing.RectangleF]::new(($x + 8), $y, ($w - 16), $h), $sfLeftMid)
             }
             "Button" {
-                $pen = if ($tone -eq "primary-outline") { $pPrimary } else { $pLine }
-                $br = if ($tone -eq "primary-outline") { $bPrimary } else { $bInk }
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bWhite -BorderPen $pen
-                $g.DrawString($cap, $fBold, $br, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
+                $g.FillRectangle($bWhite, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
+                $g.DrawString($cap, $fBody, $bBlack, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
             }
             "PrimaryButton" {
-                $bg = if ($tone -eq "purple") { $bPurple } else { $bPrimary }
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bg
+                $g.FillRectangle($bDark, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
                 $g.DrawString($cap, $fBold, $bWhite, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
-            }
-            "SuccessButton" {
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bSuccess
-                $g.DrawString($cap, $fBold, $bWhite, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
-            }
-            "DangerButton" {
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bDanger
-                $g.DrawString($cap, $fBold, $bWhite, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
-            }
-            "WarningButton" {
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bWarn
-                $g.DrawString($cap, $fBold, $bWhite, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
-            }
-            "Badge" {
-                $bg = if ($tone -eq "normal") { $bSuccess } else { $bPrimary }
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 6 -FillBrush $bg
-                $g.DrawString($cap, $fSmall, $bWhite, [System.Drawing.RectangleF]::new($x, $y, $w, $h), $sfCenter)
             }
             "CheckRow" {
                 $isSel = ($tone -eq "selected" -or $tone -eq "normal")
-                $bg = if ($isSel) { $bSuccessBg } else { $bPanel }
-                $pen = if ($isSel) { $pSuccess } else { $pLine }
-                $br = if ($isSel) { $bSuccess } else { $bInk }
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bg -BorderPen $pen
-                $g.DrawString($cap, $fBold, $bInk, ($x + 12), ($y + 12))
+                $bg = if ($isSel) { $bGrayBg } else { $bWhite }
+                $g.FillRectangle($bg, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
+                $capW = if ($sub -ne "") { $w - 92 } else { $w - 16 }
+                $g.DrawString($cap, $fBody, $bBlack, [System.Drawing.RectangleF]::new(($x + 8), $y, $capW, $h), $sfLeftMid)
                 if ($sub -ne "") {
-                    $g.DrawString($sub, $fBold, $br, [System.Drawing.RectangleF]::new($x, $y, ($w - 12), $h), $sfRightMid)
+                    $g.DrawString($sub, $fBold, $bBlack, [System.Drawing.RectangleF]::new($x, $y, ($w - 8), $h), $sfRightMid)
                 }
             }
             "SlotChip" {
                 $sfTopC = New-Object System.Drawing.StringFormat
                 $sfTopC.Alignment = [System.Drawing.StringAlignment]::Center
                 if ($tone -eq "selected") {
-                    Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bSuccess -BorderPen $pSuccess
-                    $g.DrawString($cap, $fBold, $bWhite, ($x + ($w / 2)), ($y + 8), $sfTopC)
-                    $g.DrawString($sub, $fSmall, $bWhite, ($x + ($w / 2)), ($y + 28), $sfTopC)
+                    $g.FillRectangle($bDark, $x, $y, $w, $h)
+                    $g.DrawRectangle($pThick, $x, $y, $w, $h)
+                    $g.DrawString($cap, $fBold, $bWhite, ($x + ($w / 2)), ($y + 6), $sfTopC)
+                    $g.DrawString($sub, $fSmall, $bWhite, ($x + ($w / 2)), ($y + 24), $sfTopC)
                 } elseif ($tone -eq "available") {
-                    Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bInfoBg -BorderPen $pPrimary
-                    $g.DrawString($cap, $fBold, $bInk, ($x + ($w / 2)), ($y + 8), $sfTopC)
-                    $g.DrawString($sub, $fSmall, $bPrimary, ($x + ($w / 2)), ($y + 28), $sfTopC)
+                    $g.FillRectangle($bWhite, $x, $y, $w, $h)
+                    $g.DrawRectangle($pThin, $x, $y, $w, $h)
+                    $g.DrawString($cap, $fBold, $bBlack, ($x + ($w / 2)), ($y + 6), $sfTopC)
+                    $g.DrawString($sub, $fSmall, $bBlack, ($x + ($w / 2)), ($y + 24), $sfTopC)
                 } else {
-                    Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bDisabled -BorderPen $pLine
-                    $g.DrawString($cap, $fBold, $bMuted, ($x + ($w / 2)), ($y + 8), $sfTopC)
-                    $g.DrawString($sub, $fSmall, $bMuted, ($x + ($w / 2)), ($y + 28), $sfTopC)
+                    $g.FillRectangle($bGrayBg, $x, $y, $w, $h)
+                    $g.DrawRectangle($pMuted, $x, $y, $w, $h)
+                    $g.DrawString($cap, $fBody, $bMuted, ($x + ($w / 2)), ($y + 6), $sfTopC)
+                    $g.DrawString($sub, $fSmall, $bMuted, ($x + ($w / 2)), ($y + 24), $sfTopC)
                 }
             }
             "ProgressBar" {
                 $pct = [Math]::Max(0, [Math]::Min(100, [int]$Node.Attrs.progress))
-                $barH = 14
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $barH -Radius 6 -FillBrush $bDisabled
+                $barH = 12
+                $g.FillRectangle($bWhite, $x, $y, $w, $barH)
+                $g.DrawRectangle($pThin, $x, $y, $w, $barH)
                 $fillW = [int]($w * $pct / 100.0)
                 if ($fillW -gt 0) {
-                    Draw-RoundedRect -G $g -X $x -Y $y -W $fillW -H $barH -Radius 6 -FillBrush $bSuccess
+                    $g.FillRectangle($bDark, $x, $y, $fillW, $barH)
                 }
                 $steps = [string]$Node.Attrs.steps
                 if ($steps -ne "") {
-                    $g.DrawString($steps, $fSmall, $bMuted, $x, ($y + 20))
+                    $g.DrawString($steps, $fSmall, $bMuted, $x, ($y + 16))
                 }
             }
             "ListRow" {
-                Draw-RoundedRect -G $g -X $x -Y $y -W $w -H $h -Radius 8 -FillBrush $bWhite -BorderPen $pLine
-                $g.DrawString($cap, $fBold, $bInk, ($x + 12), ($y + 10))
+                $g.FillRectangle($bWhite, $x, $y, $w, $h)
+                $g.DrawRectangle($pThin, $x, $y, $w, $h)
+                $g.DrawString($cap, $fBold, $bBlack, ($x + 8), ($y + 6))
                 if ($sub -ne "") {
-                    $g.DrawString($sub, $fSmall, $bMuted, [System.Drawing.RectangleF]::new(($x + 12), ($y + 34), ($w - 24), ($h - 40)))
+                    $g.DrawString($sub, $fSmall, $bMuted, ($x + 8), ($y + 25))
                 }
             }
         }
@@ -535,7 +461,6 @@ function Render-UiScreen {
     $g.Dispose(); $bmp.Dispose()
 }
 
-# Отрисовка всех .sysml файлов (кроме библиотеки)
 $files = Get-ChildItem -Path $BaseDir -Filter "*.sysml" | Where-Object { $_.Name -ne "ui-library.sysml" }
 foreach ($f in $files) {
     $model = Parse-SysmlModel -FilePath $f.FullName
