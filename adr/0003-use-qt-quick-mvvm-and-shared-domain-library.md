@@ -2,7 +2,7 @@
 status: "accepted"
 date: 2026-11-20
 decision-makers: Кожемякин В. О. (Архитектор ПО)
-consulted: Заказчик (Владелец СТО AutoService), Преподаватель Внук О. М.
+consulted: Мороз А. А. (Заказчик, гр. 434701), Преподаватель Внук О. М.
 informed: Команда разработки (Senior + Junior)
 ---
 

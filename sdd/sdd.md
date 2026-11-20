@@ -62,7 +62,7 @@
 
 ### 1.2 Область применения {#12-subject-scope}
 
-Проектируемая система — **AutoService v1.0** — предназначена для автоматизации записи клиентов на СТО, расчёта стоимости услуг, контроля хода ремонта в боксах, согласования дополнительных работ и ведения электронной сервисной книжки (бизнес-цели `BG01`–`BG05`).
+Проектируемая система – **AutoService v1.0** – предназначена для автоматизации записи клиентов на СТО, расчёта стоимости услуг, контроля хода ремонта в боксах, согласования дополнительных работ и ведения электронной сервисной книжки (бизнес-цели `BG01`–`BG05`).
 
 В область проектирования релиза **v1.0** (с учётом итогов двух раундов переговоров с Заказчиком) **входят**:
 - кроссплатформенный мобильный клиент на `C++17 / Qt Quick (QML)` с локальным read-only кэшем `SQLite`;
@@ -74,39 +74,39 @@
 
 В область релиза **v1.0 не входят**:
 - онлайн-эквайринг банковских карт, складской учёт запчастей и диагностика `OBD-II` (исключены на уровне SRS);
-- экспорт сервисной книжки в `PDF` (`F12`, `REQ-FUNC-024`) — перенесён в релиз `v1.1` по итогам Раунда 1 переговоров;
-- отображение эквивалента стоимости в `USD` через API курсов валют (`F13`, `REQ-INT-006`, `REQ-FUNC-012`) — отменено Заказчиком в Раунде 2 по требованиям расчётов в BYN.
+- экспорт сервисной книжки в `PDF` (`F12`, `REQ-FUNC-024`) – перенесён в релиз `v1.1` по итогам Раунда 1 переговоров;
+- отображение эквивалента стоимости в `USD` через API курсов валют (`F13`, `REQ-INT-006`, `REQ-FUNC-012`) – отменено Заказчиком в Раунде 2 по требованиям расчётов в BYN.
 
 ### 1.3 Определения, акронимы и сокращения {#13-definitions-acronyms-and-abbreviations}
 
 | Term | Definition |
 |------|------------|
-| ACID | Atomicity, Consistency, Isolation, Durability — свойства надёжной транзакции СУБД |
-| ADR | Architecture Decision Record — протокол значимого архитектурного решения (формат MADR) |
-| API | Application Programming Interface — программный интерфейс взаимодействия компонентов |
-| BYN | Белорусский рубль — единственная расчётная валюта системы AutoService v1.0 |
-| C4 | Context, Containers, Components, Code — модель визуализации архитектуры ПО |
-| DTO | Data Transfer Object — структура данных для передачи между слоями и по сети |
-| JWT | JSON Web Token — подписанный токен аутентификации (access 30 мин, refresh 14 дн.) |
-| MADR | Markdown Architectural Decision Records — шаблон фиксации ADR в Markdown |
-| MVVM | Model-View-ViewModel — архитектурный паттерн разделения UI и бизнес-логики в Qt Quick |
-| NHTSA | National Highway Traffic Safety Administration — внешний REST-сервис декодирования VIN |
-| RBAC | Role-Based Access Control — ролевой контроль доступа (`client`, `master`, `admin`) |
-| REST | Representational State Transfer — архитектурный стиль HTTP/JSON API |
-| SDD | Software Design Description — документ описания архитектуры и дизайна ПО (IEEE 1016) |
+| ACID | Atomicity, Consistency, Isolation, Durability – свойства надёжной транзакции СУБД |
+| ADR | Architecture Decision Record – протокол значимого архитектурного решения (формат MADR) |
+| API | Application Programming Interface – программный интерфейс взаимодействия компонентов |
+| BYN | Белорусский рубль – единственная расчётная валюта системы AutoService v1.0 |
+| C4 | Context, Containers, Components, Code – модель визуализации архитектуры ПО |
+| DTO | Data Transfer Object – структура данных для передачи между слоями и по сети |
+| JWT | JSON Web Token – подписанный токен аутентификации (access 30 мин, refresh 14 дн.) |
+| MADR | Markdown Architectural Decision Records – шаблон фиксации ADR в Markdown |
+| MVVM | Model-View-ViewModel – архитектурный паттерн разделения UI и бизнес-логики в Qt Quick |
+| NHTSA | National Highway Traffic Safety Administration – внешний REST-сервис декодирования VIN |
+| RBAC | Role-Based Access Control – ролевой контроль доступа (`client`, `master`, `admin`) |
+| REST | Representational State Transfer – архитектурный стиль HTTP/JSON API |
+| SDD | Software Design Description – документ описания архитектуры и дизайна ПО (IEEE 1016) |
 | SQLite | Встраиваемая локальная СУБД мобильного клиента для read-only оффлайн-кэша |
-| SRS | Software Requirements Specification — спецификация требований к ПО (ISO/IEC/IEEE 29148) |
-| VIN | Vehicle Identification Number — 17-символьный номер автомобиля (ISO 3779) |
+| SRS | Software Requirements Specification – спецификация требований к ПО (ISO/IEC/IEEE 29148) |
+| VIN | Vehicle Identification Number – 17-символьный номер автомобиля (ISO 3779) |
 
 ### 1.4 Ссылки {#14-references}
 
-1. **IEEE Std 1016-2009** — *Systems and software engineering — Software design description* (нормативный стандарт структуры SDD).
-2. **ISO/IEC/IEEE 42010:2011** — *Systems and software engineering — Architecture description* (нормативный стандарт точек зрения и представлений).
-3. **ISO/IEC/IEEE 29148:2018** — *Systems and software engineering — Life cycle processes — Requirements engineering* (нормативный стандарт SRS).
-4. **Спецификация требований к ПО AutoService (версия 0.2)** — [`srs/srs.md`](../srs/srs.md), 2026-11-20 (нормативный источник требований `REQ-*`).
-5. **Протоколы архитектурных решений (ADR-0001..0006)** — каталог [`adr/`](../adr/), 2026-11-20 (нормативные проектные решения).
-6. **Переписка с Заказчиком и планы итераций** — [`sdd/negotiations.md`](negotiations.md) и [`sdd/planning.md`](planning.md), 2026-11-20 (справочные артефакты планирования).
-7. **Шаблон SDD учебного репозитория** — `sdd/sdd-template.md`, кафедра ЭВМ, БГУИР, 2026 (нормативный шаблон документа).
+1. **IEEE Std 1016-2009** – *Systems and software engineering – Software design description* (нормативный стандарт структуры SDD).
+2. **ISO/IEC/IEEE 42010:2011** – *Systems and software engineering – Architecture description* (нормативный стандарт точек зрения и представлений).
+3. **ISO/IEC/IEEE 29148:2018** – *Systems and software engineering – Life cycle processes – Requirements engineering* (нормативный стандарт SRS).
+4. **Спецификация требований к ПО AutoService (версия 0.2)** – [`srs/srs.md`](../srs/srs.md), 2026-11-20 (нормативный источник требований `REQ-*`).
+5. **Протоколы архитектурных решений (ADR-0001..0006)** – каталог [`adr/`](../adr/), 2026-11-20 (нормативные проектные решения).
+6. **Переписка с Заказчиком и планы итераций** – [`sdd/negotiations.md`](negotiations.md) и [`sdd/planning.md`](planning.md), 2026-11-20 (справочные артефакты планирования).
+7. **Шаблон SDD учебного репозитория** – `sdd/sdd-template.md`, кафедра ЭВМ, БГУИР, 2026 (нормативный шаблон документа).
 
 ### 1.5 Обзор документа {#15-document-overview}
 
@@ -122,7 +122,7 @@
 
 | Стейкхолдер | Ключевые задачи и интересы | Адресующие точки зрения / представления |
 |---|---|---|
-| **Заказчик (Владелец СТО)** | Соблюдение дедлайна `2027-01-29` и бюджета ≤ \$11,800; исключение двойных записей; рост согласований доп. работ за счёт фотоотчёта; возврат клиентов на ТО | Context (`DV-001`), Interaction (`DV-005`), State Dynamics (`DV-006`), Concurrency (`DV-008`), План v3 |
+| **Заказчик (Мороз А. А., гр. 434701)** | Соблюдение дедлайна `2027-01-29` и бюджета ≤ \$11,800; исключение двойных записей; рост согласований доп. работ за счёт фотоотчёта; возврат клиентов на ТО | Context (`DV-001`), Interaction (`DV-005`), State Dynamics (`DV-006`), Concurrency (`DV-008`), План v3 |
 | **Клиент СТО (Автовладелец)** | Быстрое добавление авто по VIN, прозрачный расчёт в BYN, оффлайн-доступ к истории ремонтов, наглядный фотоотчёт доп. работ, защита ПДн | Context (`DV-001`), Interface (`DV-004`), Algorithm (`DV-007`), Information (`DV-003`) |
 | **Мастер и Администратор СТО** | Удобное управление заказами своего бокса, загрузка фото в 2 касания, оперативное обновление тарифов и индикатор загрузки СТО | Interface (`DV-004`), State Dynamics (`DV-006`), Interaction (`DV-005`) |
 | **Архитектор / Senior-разработчик** | Чёткие границы слоёв, воспроизводимая сборка CMake, переиспользуемость доменной логики, безопасность делегирования задач Junior | Composition (`DV-002`), Structure & Dependency (`DV-002`), Patterns (`ADR-0003`), Deployment (`DV-009`) |
@@ -218,8 +218,8 @@
 - **Title:** Контекстное представление системы AutoService v1.0
 - **Viewpoint:** Контекст (2.2.1)
 - **Representation:** Система **AutoService** взаимодействует с тремя ролями пользователей (Клиент СТО, Мастер СТО, Администратор СТО) через единый клиент Qt Quick с ролевой маршрутизацией, а также с двумя внешними программными системами (после исключения API курсов валют в Раунде 2):
-  1. **NHTSA VIN API** (`HTTPS / REST`) — декодирование 17-символьного VIN при добавлении автомобиля (с резервным ручным вводом);
-  2. **Сервис Push-уведомлений (FCM / APNs)** — доставка оповещений о готовности автомобиля, запросах доп. работ с фотоотчётом и напоминаниях о плановом ТО.
+  1. **NHTSA VIN API** (`HTTPS / REST`) – декодирование 17-символьного VIN при добавлении автомобиля (с резервным ручным вводом);
+  2. **Сервис Push-уведомлений (FCM / APNs)** – доставка оповещений о готовности автомобиля, запросах доп. работ с фотоотчётом и напоминаниях о плановом ТО.
   Базовая контекстная схема приведена в [srs/images/system-context.png](../srs/images/system-context.png); актуальный состав внешних узлов отражён на схеме композиции `DV-002`.
 - **More Information:** Реализует `REQ-INT-001`, `REQ-INT-004`, `REQ-INT-007`, `REQ-FUNC-001..005`, `REQ-FUNC-019`, `REQ-FUNC-031..032`. Связанные решения: `ADR-0005`, `ADR-0006`.
 
@@ -261,12 +261,12 @@
   - `vehicles` (`id`, `owner_id FK`, `vin CHAR(17)`, `brand`, `model`, `year`, `mileage_km`, `plate_number`, `body_type`, `body_coeff`);
   - `service_catalog` (`id`, `code UNIQUE`, `name`, `base_price_byn`, `base_duration_min`, `use_body_coeff`, `is_active`);
   - `service_boxes` (`id`, `number UNIQUE`, `work_start`, `work_end`, `is_active`);
-  - `orders` (`id`, `vehicle_id FK`, `box_id FK`, `slot_start`, `slot_end`, `status`, `mileage_at_visit`, `subtotal_byn`, `discount_byn`, `total_byn`, `created_at`) — с ограничением `EXCLUDE USING gist` по активным слотам;
-  - `order_services` (`order_id FK`, `service_id FK`, `service_name_snapshot`, `price_snapshot_byn`, `duration_snapshot_min`) — неизменяемый снимок тарифов на момент заказа (`REQ-FUNC-022`);
+  - `orders` (`id`, `vehicle_id FK`, `box_id FK`, `slot_start`, `slot_end`, `status`, `mileage_at_visit`, `subtotal_byn`, `discount_byn`, `total_byn`, `created_at`) – с ограничением `EXCLUDE USING gist` по активным слотам;
+  - `order_services` (`order_id FK`, `service_id FK`, `service_name_snapshot`, `price_snapshot_byn`, `duration_snapshot_min`) – неизменяемый снимок тарифов на момент заказа (`REQ-FUNC-022`);
   - `additional_work_requests` (`id`, `order_id FK`, `master_id FK`, `title`, `price_byn`, `comment`, `decision`, `decided_at`);
   - `order_photos` *(новое в v1.0, `F15`)* (`id`, `request_id FK`, `storage_key`, `mime_type`, `size_bytes`, `sha256`, `uploaded_at`);
   - `maintenance_reminders` *(новое в v1.0, `F16`)* (`id`, `vehicle_id FK`, `interval_km`, `interval_months`, `next_due_date`, `next_due_km`, `notified_at`, `is_enabled`);
-  - `audit_log` (`id`, `actor_id FK`, `action`, `target_entity`, `target_id`, `payload_jsonb`, `created_at`) — только `INSERT`, запрет `UPDATE/DELETE` на уровне роли БД (`REQ-SEC-008`).
+  - `audit_log` (`id`, `actor_id FK`, `action`, `target_entity`, `target_id`, `payload_jsonb`, `created_at`) – только `INSERT`, запрет `UPDATE/DELETE` на уровне роли БД (`REQ-SEC-008`).
 
   Локальная база `SQLite` клиента содержит 3 read-only кэш-таблицы (`cached_vehicles`, `cached_service_catalog`, `cached_order_history`) с индексом по `(vehicle_id, completed_at DESC)` и очищается при выходе пользователя (`REQ-DIST-001`).
 - **More Information:** Реализует `REQ-INT-008..009`, `REQ-FUNC-002`, `REQ-FUNC-007`, `REQ-FUNC-020..022`, `REQ-FUNC-031..032`, `REQ-SEC-001`, `REQ-SEC-006`, `REQ-SEC-008`, `REQ-COMP-002..003`, `REQ-PERF-004`. Связанные решения: `ADR-0001`, `ADR-0004`, `ADR-0006`.
@@ -394,10 +394,10 @@
   ![Диаграмма развёртывания AutoService](images/deployment.png)
 
   Серверный контур разворачивается одной командой `docker compose up -d` (`REQ-INST-001`) на хосте СТО (или VPS) и включает:
-  1. `nginx` — терминация `HTTPS (TLS 1.2/1.3)`, ограничение размера тела запроса (2 МБ для фото), проксирование на `Cloud API`;
-  2. `autoservice-api` — контейнер C++17 `Cloud API` с автоперезапуском `restart: unless-stopped` (`REQ-AVAIL-001`) и примонтированным томом `/var/lib/autoservice/media`;
-  3. `postgres` (PostgreSQL 16) — контейнер БД с постоянным томом данных и автоматическим прогоном SQL-миграций при старте;
-  4. `backup-cron` — ежедневный `pg_dump` + инкрементальная синхронизация медиа-тома (целевой `RTO <= 30 мин`, `REQ-AVAIL-002`).
+  1. `nginx` – терминация `HTTPS (TLS 1.2/1.3)`, ограничение размера тела запроса (2 МБ для фото), проксирование на `Cloud API`;
+  2. `autoservice-api` – контейнер C++17 `Cloud API` с автоперезапуском `restart: unless-stopped` (`REQ-AVAIL-001`) и примонтированным томом `/var/lib/autoservice/media`;
+  3. `postgres` (PostgreSQL 16) – контейнер БД с постоянным томом данных и автоматическим прогоном SQL-миграций при старте;
+  4. `backup-cron` – ежедневный `pg_dump` + инкрементальная синхронизация медиа-тома (целевой `RTO <= 30 мин`, `REQ-AVAIL-002`).
 
   **Таблица бюджетов и квот ресурсов:**
 
@@ -432,7 +432,7 @@
 
 ### 5.1 Приоритизация функционала (шкала 10–50) и планы итераций
 
-Детальная приоритизация всех 16 модулей (`F01`–`F16`) на английском и русском языках с ранжированием от `10` (наивысший) до `50` (минимальный), а также три версии календарного плана (**План v1 — Исходный**, **План v2 — Изменённый после Раунда 1**, **План v2.5 — Промежуточный**, **План v3 — Согласованный с Junior-разработчиком**) приведены в отдельном документе [`sdd/planning.md`](planning.md). Протокол обоих раундов переписки с Заказчиком зафиксирован в [`sdd/negotiations.md`](negotiations.md).
+Детальная приоритизация всех 16 модулей (`F01`–`F16`) на английском и русском языках с ранжированием от `10` (наивысший) до `50` (минимальный), а также три версии календарного плана (**План v1 – Исходный**, **План v2 – Изменённый после Раунда 1**, **План v2.5 – Промежуточный**, **План v3 – Согласованный с Junior-разработчиком**) приведены в отдельном документе [`sdd/planning.md`](planning.md). Протокол обоих раундов переписки с Заказчиком зафиксирован в [`sdd/negotiations.md`](negotiations.md).
 
 ### 5.2 Матрица сквозной трассируемости (`SRS ↔ SDD ↔ ADR ↔ План v3`)
 
@@ -452,5 +452,5 @@
 | `REQ-FUNC-020..022`, `REQ-INT-008`, `REQ-REL-001`, `REQ-DIST-001`, `REQ-PERF-004` | `F10` Repair History & SQLite Offline Cache | 25 | `DV-002`, `DV-003`, `DV-004`, `DV-009` | `ADR-0001` | Итерация 5 | Senior + Junior |
 | `REQ-FUNC-023` | `F11` Service Book Export (JSON) | 30 | `DV-002`, `DV-003` | `ADR-0001`, `ADR-0003` | Итерация 5 | Junior (ревью Sr) |
 | `REQ-FUNC-032` *(новое в R2)* | `F16` Scheduled Maintenance Reminders | 25 | `DV-003`, `DV-004`, `DV-006`, `DV-007` | `ADR-0005`, `ADR-0006` | Итерация 5 | Senior + Junior |
-| `REQ-FUNC-024` | `F12` Service Book Export (PDF) | 45 | — | — | Отложено (v1.1) | — |
-| `REQ-INT-006`, `REQ-FUNC-012` | `F13` Multi-Currency Display (BYN/USD) | 50 | — | `ADR-0005` | Отменено (R2) | — |
+| `REQ-FUNC-024` | `F12` Service Book Export (PDF) | 45 | – | – | Отложено (v1.1) | – |
+| `REQ-INT-006`, `REQ-FUNC-012` | `F13` Multi-Currency Display (BYN/USD) | 50 | – | `ADR-0005` | Отменено (R2) | – |
