@@ -2,13 +2,13 @@
 
 Для AutoService
 
-Версия 0.1
+Версия 0.2
 
 Подготовил Кожемякин В. О., гр. 434701
 
 БГУИР, ФКСиС, кафедра ЭВМ
 
-2026-11-12
+2026-11-20
 
 ## Оглавление
 
@@ -60,6 +60,7 @@
 | Name | Date | Reason For Changes | Version |
 |------|------|--------------------|---------|
 | Кожемякин В. О. | 2026-11-12 | Первоначальная разработка SRS по итогам интервью с Заказчиком | 0.1 |
+| Кожемякин В. О. | 2026-11-20 | Обновление по итогам ЛР4 (Раунды 1 и 2 переговоров): добавлены `REQ-FUNC-031` (фотоотчёт доп. работ) и `REQ-FUNC-032` (напоминания о плановом ТО); `REQ-INT-006` и `REQ-FUNC-012` (USD) отменены; `REQ-FUNC-024` (PDF) перенесено в v1.1; `REQ-FUNC-020` уточнено как read-only кэш SQLite | 0.2 |
 
 ---
 
@@ -499,11 +500,27 @@
 
 - **ID:** REQ-FUNC-030
 - **Title:** Просмотр сводной загрузки СТО на текущий день
-- **Statement:** Панель администратора должна рассчитывать и отображать загрузку СТО на текущую дату в процентах и количестве активных заказов относительно общей ёмкости слотов активных боксов.
+- **Statement:** Панель администратора должна рассчитывать и отображать загрузку СТО на текущую дату в процентах и количестве активных заказов относительно общей ёмкости слотов активных боксов (компактный оперативный индикатор без исторических графиков).
 - **Rationale:** Помогает администратору планировать сменную нагрузку персонала и выявлять пиковые дни.
 - **Acceptance Criteria:** В панели администратора (`images/ui-staff.png`) выводится показатель вида `Загрузка СТО сегодня: 85% (17 заказов)`, пересчитываемый при добавлении или отмене записей.
 - **Verification Method:** Test
-- **More Information:** Цель BG04; приоритет «желательно»; подсистема «Cloud API».
+- **More Information:** Цель BG04; приоритет `35` (обязательно в v1.0 после упрощения в Раунде 1); подсистема «Cloud API / Мобильный клиент».
+
+- **ID:** REQ-FUNC-031
+- **Title:** Фотоотчёт мастера по дополнительным работам *(добавлено в v0.2, Раунд 2)*
+- **Statement:** Мастер СТО при создании запроса на дополнительные работы должен иметь возможность прикрепить от 1 до 3 фотографий выявленной неисправности (JPEG, сжатие ≤ 500 КБ), а клиент — просматривать эти фотографии в карточке согласования доп. работ через защищённый RBAC-эндпоинт.
+- **Rationale:** Повышает доверие клиентов к запросам дополнительных работ и увеличивает долю подтверждённых согласований.
+- **Acceptance Criteria:** Мастер загружает до 3 фото к запросу доп. работ; клиент видит миниатюры и полноразмерный просмотр; попытка другого пользователя получить доступ к фото возвращает HTTP `403 Forbidden`.
+- **Verification Method:** Test
+- **More Information:** Цель BG02, BG04; приоритет `15` (высокий, v1.0); подсистема «Cloud API / Мобильный клиент»; решение `ADR-0006`.
+
+- **ID:** REQ-FUNC-032
+- **Title:** Напоминания о плановом ТО по дате и пробегу *(добавлено в v0.2, Раунд 2)*
+- **Statement:** После завершения заказа система должна автоматически рассчитывать рекомендуемую дату и пробег следующего планового ТО (по умолчанию через 12 месяцев или 10 000 км, с возможностью настройки клиентом) и отправлять Push-уведомление за 14 дней до наступления срока с переходом к быстрой записи.
+- **Rationale:** Повышает возвращаемость постоянных клиентов СТО и упрощает контроль регламентного обслуживания автомобиля.
+- **Acceptance Criteria:** После перевода заказа в статус «Завершён» в `maintenance_reminders` обновляются дата и пробег следующего ТО; планировщик формирует Push за 14 дней; на экране гаража отображается карточка ближайшего ТО.
+- **Verification Method:** Test
+- **More Information:** Цель BG01, BG03; приоритет `25` (средний, v1.0); подсистема «Cloud API / Мобильный клиент»; решение `ADR-0006`.
 
 ---
 
@@ -837,7 +854,7 @@
 
 ## 4. Верификация {#4-verification}
 
-В таблице ниже приведена матрица верификации всех 74 требований спецификации. Поле «Статус» имеет значение `Planned` на этапе разработки SRS и будет обновляться по мере реализации и прохождения тестов в последующих лабораторных работах.
+В таблице ниже приведена матрица верификации всех 76 требований спецификации (73 активных в v1.0, 1 отложено в v1.1, 2 отменены в Раунде 2). Поле «Статус» имеет значение `Planned` для активных требований и обновляется по мере реализации и прохождения тестов в последующих лабораторных работах.
 
 | Requirement ID | Verification Method | Test/Artifact Link | Status | Evidence |
 |----------------|---------------------|--------------------|--------|----------|
@@ -846,7 +863,7 @@
 | REQ-INT-003 | Demonstration | tests/ui/test_touch_targets.md | Planned | srs/images/ui-garage.png |
 | REQ-INT-004 | Test | tests/api/test_nhtsa_vin_integration.cpp | Planned | — |
 | REQ-INT-005 | Test | tests/api/test_rest_auth_contract.cpp | Planned | — |
-| REQ-INT-006 | Test | tests/api/test_currency_rate_api.cpp | Planned | — |
+| REQ-INT-006 | Test | tests/api/test_currency_rate_api.cpp | Cancelled (R2) | sdd/negotiations.md |
 | REQ-INT-007 | Test | tests/api/test_push_gateway.cpp | Planned | — |
 | REQ-INT-008 | Test | tests/client/test_sqlite_cache.cpp | Planned | — |
 | REQ-INT-009 | Test | tests/api/test_postgres_persistence.cpp | Planned | — |
@@ -861,7 +878,7 @@
 | REQ-FUNC-009 | Test | tests/func/test_body_type_coefficients.cpp | Planned | srs/images/ui-garage.png |
 | REQ-FUNC-010 | Test | tests/func/test_complex_discount.cpp | Planned | srs/images/ui-garage.png |
 | REQ-FUNC-011 | Test | tests/func/test_duration_calculation.cpp | Planned | — |
-| REQ-FUNC-012 | Demonstration | tests/ui/test_total_byn_usd_display.md | Planned | srs/images/ui-garage.png |
+| REQ-FUNC-012 | Demonstration | tests/ui/test_total_byn_usd_display.md | Cancelled (R2) | sdd/negotiations.md |
 | REQ-FUNC-013 | Test | tests/func/test_box_slots_schedule.cpp | Planned | srs/images/ui-booking.png |
 | REQ-FUNC-014 | Test | tests/func/test_booking_double_lock.cpp | Planned | — |
 | REQ-FUNC-015 | Test | tests/func/test_booking_cancel_reschedule.cpp | Planned | — |
@@ -873,13 +890,15 @@
 | REQ-FUNC-021 | Test | tests/func/test_sqlite_cloud_sync.cpp | Planned | — |
 | REQ-FUNC-022 | Test | tests/func/test_history_snapshot_immutability.cpp | Planned | — |
 | REQ-FUNC-023 | Test | tests/func/test_export_service_book_json.cpp | Planned | srs/images/ui-booking.png |
-| REQ-FUNC-024 | Test | tests/func/test_export_service_book_pdf.cpp | Planned | srs/images/ui-booking.png |
+| REQ-FUNC-024 | Test | tests/func/test_export_service_book_pdf.cpp | Deferred (v1.1) | sdd/negotiations.md |
 | REQ-FUNC-025 | Demonstration | tests/ui/test_master_box_orders.md | Planned | srs/images/ui-staff.png |
 | REQ-FUNC-026 | Test | tests/func/test_master_status_transition.cpp | Planned | srs/images/ui-staff.png |
 | REQ-FUNC-027 | Test | tests/func/test_master_request_extra_work.cpp | Planned | srs/images/ui-staff.png |
 | REQ-FUNC-028 | Test | tests/func/test_admin_tariffs_live_update.cpp | Planned | srs/images/ui-staff.png |
 | REQ-FUNC-029 | Test | tests/func/test_admin_boxes_staff_accounts.cpp | Planned | srs/images/ui-staff.png |
 | REQ-FUNC-030 | Test | tests/func/test_admin_daily_load_stats.cpp | Planned | srs/images/ui-staff.png |
+| REQ-FUNC-031 | Test | tests/func/test_extra_work_photos.cpp | Planned | sdd/images/seq-booking-extra.png |
+| REQ-FUNC-032 | Test | tests/func/test_maintenance_reminders.cpp | Planned | sdd/sdd.md |
 | REQ-PERF-001 | Test | tests/perf/test_api_p95_latency.md | Planned | — |
 | REQ-PERF-002 | Test | tests/perf/test_vin_decode_timeout.cpp | Planned | — |
 | REQ-PERF-003 | Test | tests/perf/test_qml_screen_switch.md | Planned | — |
