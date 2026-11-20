@@ -1,4 +1,4 @@
-﻿# Generator of B&W SDD architecture diagrams, negotiation chats (with Moroz A.A.), and color iteration plan charts
+﻿# Generator of B&W no-fill SDD architecture diagrams and color iteration plan charts
 Add-Type -AssemblyName System.Drawing
 
 $outDir = Join-Path $PSScriptRoot "..\images"
@@ -85,24 +85,24 @@ function Draw-BoxBW($g, [float]$x, [float]$y, [float]$w, [float]$h, [string]$tit
 }
 
 function Draw-HeaderBW($g, [int]$w, [string]$title, [string]$subtitle) {
-    $bg = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(245, 245, 245))
+    $bg = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
     $pn = New-Object System.Drawing.Pen([System.Drawing.Color]::Black, 1.5)
     $g.FillRectangle($bg, 0, 0, $w, 56)
     $g.DrawLine($pn, 0, 56, $w, 56)
     $ft = New-Object System.Drawing.Font("Segoe UI", 13.5, [System.Drawing.FontStyle]::Bold)
     $fs = New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Regular)
     $bt = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::Black)
-    $bs = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(60, 60, 60))
+    $bs = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(40, 40, 40))
     $g.DrawString($title, $ft, $bt, 18, 8)
     $g.DrawString($subtitle, $fs, $bs, 18, 33)
     $bg.Dispose(); $pn.Dispose(); $ft.Dispose(); $fs.Dispose(); $bt.Dispose(); $bs.Dispose()
 }
 
-# Monochrome palette for ALL 5 architecture diagrams
+# Pure B&W no-fill palette for ALL 5 architecture diagrams (white backgrounds, crisp black lines & text)
 $colWhite = [System.Drawing.Color]::White
-$colTint1 = [System.Drawing.Color]::FromArgb(248, 248, 248)
-$colTint2 = [System.Drawing.Color]::FromArgb(236, 236, 236)
-$colTint3 = [System.Drawing.Color]::FromArgb(224, 224, 224)
+$colTint1 = [System.Drawing.Color]::White
+$colTint2 = [System.Drawing.Color]::White
+$colTint3 = [System.Drawing.Color]::White
 
 $penBW     = New-Object System.Drawing.Pen([System.Drawing.Color]::Black, 1.7)
 $penBWBold = New-Object System.Drawing.Pen([System.Drawing.Color]::Black, 2.1)
@@ -184,28 +184,27 @@ $c = New-Canvas 1480 860
 $g = $c.g
 Draw-HeaderBW $g 1480 "DV-003: Логическая ER-модель БД PostgreSQL (11 таблиц) и локального кэша SQLite" "Связанные решения: ADR-0001, ADR-0004, ADR-0006 | Все запросы параметризованы (REQ-SEC-006)"
 
-function Draw-EntityBW($g, [float]$x, [float]$y, [float]$w, [string]$name, [string[]]$fields, [bool]$darkHeader = $true) {
+function Draw-EntityBW($g, [float]$x, [float]$y, [float]$w, [string]$name, [string[]]$fields, [bool]$isCore = $true) {
     $rowH = 19
     $h = 30 + $fields.Count * $rowH + 6
     $bg = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
-    $hb = New-Object System.Drawing.SolidBrush($(if ($darkHeader) { [System.Drawing.Color]::FromArgb(38, 38, 38) } else { [System.Drawing.Color]::FromArgb(228, 228, 228) }))
     $pn = New-Object System.Drawing.Pen([System.Drawing.Color]::Black, 1.6)
+    if (-not $isCore) { $pn.DashStyle = [System.Drawing.Drawing2D.DashStyle]::Dash }
+    $pnSep = New-Object System.Drawing.Pen([System.Drawing.Color]::Black, 1.4)
     $g.FillRectangle($bg, $x, $y, $w, $h)
-    $g.FillRectangle($hb, $x, $y, $w, 28)
     $g.DrawRectangle($pn, $x, $y, $w, $h)
-    $g.DrawLine($pn, $x, $y + 28, $x + $w, $y + 28)
+    $g.DrawLine($pnSep, $x, $y + 28, $x + $w, $y + 28)
     $ft = New-Object System.Drawing.Font("Consolas", 10, [System.Drawing.FontStyle]::Bold)
     $ff = New-Object System.Drawing.Font("Consolas", 8.8, [System.Drawing.FontStyle]::Regular)
     $ffb = New-Object System.Drawing.Font("Consolas", 8.8, [System.Drawing.FontStyle]::Bold)
-    $hdrBrush = if ($darkHeader) { [System.Drawing.Brushes]::White } else { [System.Drawing.Brushes]::Black }
-    $g.DrawString($name, $ft, $hdrBrush, $x + 8, $y + 6)
+    $g.DrawString($name, $ft, [System.Drawing.Brushes]::Black, $x + 8, $y + 6)
     $cy = $y + 32
     foreach ($fld in $fields) {
         $useFont = if ($fld.StartsWith("PK") -or $fld.StartsWith("FK")) { $ffb } else { $ff }
         $g.DrawString($fld, $useFont, [System.Drawing.Brushes]::Black, $x + 8, $cy)
         $cy += $rowH
     }
-    $bg.Dispose(); $hb.Dispose(); $pn.Dispose(); $ft.Dispose(); $ff.Dispose(); $ffb.Dispose()
+    $bg.Dispose(); $pn.Dispose(); $pnSep.Dispose(); $ft.Dispose(); $ff.Dispose(); $ffb.Dispose()
     return $h
 }
 
@@ -240,7 +239,7 @@ Draw-Arrow $g $penBW 865 550 865 516 "1 : N" 26 -8
 Draw-Arrow $g $penBW 1020 155 1095 155 "1 : N" 0 -16
 Draw-Arrow $g $penBW 1270 268 1270 310 "1 : 0..3" 32 -8
 
-$g.DrawString("Примечание: тёмные заголовки – базовые таблицы ядра (SRS v0.1); светлые заголовки [NEW R2] – таблицы, добавленные в Раунде 2 (F15, F16).", (New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Italic)), [System.Drawing.Brushes]::Black, 30, 815)
+$g.DrawString("Примечание: сплошная рамка – базовые таблицы ядра (SRS v0.1); пунктирная рамка [NEW R2] – таблицы, добавленные в Раунде 2 (F15, F16).", (New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Italic)), [System.Drawing.Brushes]::Black, 30, 815)
 $g.DrawRectangle((New-Object System.Drawing.Pen([System.Drawing.Color]::Black, 1.2)), 0, 0, 1479, 859)
 Save-Canvas $c "er-database.png"
 
@@ -534,71 +533,4 @@ $g.DrawLine($ceilPen, $ceilX, $chartY + 32, $ceilX, $by + 6)
 $g.DrawString('Лимит бюджета Заказчика: $11,800', (New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)), (New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(15, 23, 42))), $ceilX - 105, $by + 10)
 Save-Canvas $c "plans-comparison.png"
 
-# ============================================================================
-# 7 & 8. CHAT-ROUND1.PNG and CHAT-ROUND2.PNG (Correspondence with Мороз А. А.)
-# ============================================================================
-function Render-Chat([string]$fileName, [string]$headerTitle, [string]$headerSub, $messages) {
-    $w = 1120
-    $bubbleW = 760
-    $fSender = New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Bold)
-    $fBody   = New-Object System.Drawing.Font("Segoe UI", 10.2, [System.Drawing.FontStyle]::Regular)
-    $tmpBmp  = New-Object System.Drawing.Bitmap(10, 10)
-    $tmpG    = [System.Drawing.Graphics]::FromImage($tmpBmp)
-
-    $heights = @()
-    $totalH = 82
-    foreach ($m in $messages) {
-        $sz = $tmpG.MeasureString($m.text, $fBody, $bubbleW - 28)
-        $bh = [int][Math]::Ceiling($sz.Height) + 46
-        $heights += $bh
-        $totalH += $bh + 16
-    }
-    $totalH += 20
-    $tmpG.Dispose(); $tmpBmp.Dispose()
-
-    $c = New-Canvas $w $totalH
-    $g = $c.g
-    $g.Clear([System.Drawing.Color]::FromArgb(241, 245, 249))
-
-    $g.FillRectangle((New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(30, 41, 59))), 0, 0, $w, 60)
-    $g.DrawString($headerTitle, (New-Object System.Drawing.Font("Segoe UI", 13, [System.Drawing.FontStyle]::Bold)), [System.Drawing.Brushes]::White, 22, 10)
-    $g.DrawString($headerSub, (New-Object System.Drawing.Font("Segoe UI", 9.2, [System.Drawing.FontStyle]::Regular)), (New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(203, 213, 225))), 22, 34)
-
-    $y = 78
-    for ($i = 0; $i -lt $messages.Count; $i++) {
-        $m = $messages[$i]
-        $bh = $heights[$i]
-        $isExec = ($m.role -eq "exec")
-        $bx = if ($isExec) { $w - $bubbleW - 26 } else { 26 }
-        $fill = if ($isExec) { [System.Drawing.Color]::FromArgb(219, 234, 254) } else { [System.Drawing.Color]::White }
-        $border = if ($isExec) { [System.Drawing.Color]::FromArgb(96, 165, 250) } else { [System.Drawing.Color]::FromArgb(203, 213, 225) }
-        $nameColor = if ($isExec) { [System.Drawing.Color]::FromArgb(30, 64, 175) } else { [System.Drawing.Color]::FromArgb(180, 83, 9) }
-
-        Draw-RoundRect $g (New-Object System.Drawing.SolidBrush($fill)) (New-Object System.Drawing.Pen($border, 1.4)) $bx $y $bubbleW $bh 12
-        $g.DrawString($m.sender, $fSender, (New-Object System.Drawing.SolidBrush($nameColor)), $bx + 14, $y + 8)
-        $g.DrawString($m.time, (New-Object System.Drawing.Font("Segoe UI", 8.5, [System.Drawing.FontStyle]::Regular)), (New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(100, 116, 139))), $bx + $bubbleW - 120, $y + 10)
-        $g.DrawString($m.text, $fBody, (New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(15, 23, 42))), ([System.Drawing.RectangleF]::new(($bx + 14), ($y + 30), ($bubbleW - 28), ($bh - 34))))
-        $y += $bh + 16
-    }
-    $fSender.Dispose(); $fBody.Dispose()
-    Save-Canvas $c $fileName
-}
-
-$r1Msgs = @(
-    @{ role="exec"; sender="Исполнитель (Архитектор ПО – Кожемякин В. О., гр. 434701)"; time="18.11, 10:15"; text="Добрый день! На базе SRS v0.1 подготовил SDD, 5 ADR и приоритизированный бэклог F01-F14 (10..50). Первичный План v1 (1 Senior, `$35/ч, итерация 2 нед. = 70 ч): 368 ч, 6 итераций (12 нед., до 12.02.2027), стоимость `$12,880. Самые объёмные модули: F10 оффлайн SQLite (42 ч), F06 бронирование (38 ч), F02 RBAC/JWT (36 ч), F12 экспорт PDF (26 ч), F14 аналитика загрузки (20 ч)." },
-    @{ role="cust"; sender="Заказчик (Мороз А. А., гр. 434701)"; time="18.11, 13:40"; text="Здравствуйте! 12 недель и `$12,880 – многовато, я рассчитывал на 10 недель (5 итераций, до 29.01.2027) и бюджет ~`$11,000-`$11,500. Не ожидал, что оффлайн-история F10 стоит 42 ч (`$1,470), экспорт в PDF F12 – 26 ч (`$910), а бронирование F06 – 38 ч (`$1,330)! Почему так долго и как можно сократить сроки?" },
-    @{ role="exec"; sender="Исполнитель (Архитектор ПО – Кожемякин В. О., гр. 434701)"; time="18.11, 16:05"; text="Поясню прозрачно и предложу безопасные варианты оптимизации:`n1) F06 (38 ч) – это ACID-защита от двойной записи в один бокс (блокировки PostgreSQL, перенос/отмена за >=2 ч). Упрощать нельзя, иначе на СТО приедут две машины в одно время. Оставляем 38 ч (приоритет 10).`n2) F10 (42 ч -> 26 ч, экономия -16 ч / -`$560): уберём сложную двустороннюю оффлайн-синхронизацию и сделаем read-only кэш SQLite (Pull-only) – история и гараж по-прежнему открываются без сети <200 мс.`n3) F12 PDF (26 ч -> в релиз v1.1, экономия -26 ч / -`$910): в v1.0 оставим JSON-экспорт (F11, 10 ч), а вёрстку PDF перенесём в v1.1 (приоритет 45).`n4) F14 (20 ч -> 10 ч, экономия -10 ч / -`$350): вместо графиков оставим компактный индикатор загрузки СТО на сегодня.`nИтог (План v2): 316 ч, ровно 5 итераций (до 29.01.2027), стоимость `$11,060 (экономия `$1,820 и -2 недели)!" },
-    @{ role="cust"; sender="Заказчик (Мороз А. А., гр. 434701)"; time="18.11, 18:20"; text="Теперь всё предельно понятно! На защите от двойной записи экономить не будем. Все три оптимизации принимаю (F10 read-only 26 ч, F12 PDF -> v1.1 с приоритетом 45, F14 счётчик 10 ч с приоритетом 35). Дополнительно поднимите приоритет F08 (доп. работы) с 20 до 15. Готовьте План v2 на 5 итераций и обновляйте SDD!" }
-)
-Render-Chat "chat-round1.png" "Переписка по проекту AutoService – Раунд 1 (Обсуждение SDD, сроков и приоритетов)" 'Участники: Кожемякин В. О. (Исполнитель) и Мороз А. А. (Заказчик, гр. 434701) | Итог: План v2 (5 итераций, $11,060)' $r1Msgs
-
-$r2Msgs = @(
-    @{ role="cust"; sender="Заказчик (Мороз А. А., гр. 434701)"; time="19.11, 15:10"; text="Владислав, срочная корректировка после планёрки с мастером и бухгалтером! Во-первых, я передумал делать F13 (эквивалент в USD) – в РБ расчёты строго в BYN, убираем F13 совсем. Во-вторых, я забыл о двух критически важных функциях:`n1) Фотоотчёт мастера по доп. работам (1-3 фото неисправности прямо из бокса, чтобы клиент доверял и подтверждал работы);`n2) Автоматические напоминания о плановом ТО (через 10 000 км / 12 мес., Push за 14 дней с кнопкой записи).`nОцените и обновите план!" },
-    @{ role="exec"; sender="Исполнитель (Архитектор ПО – Кожемякин В. О., гр. 434701)"; time="19.11, 17:45"; text="Декомпозировал новые функции (оценка Senior):`n• F15 Фотоотчёт (приоритет 15, 44 ч): сервер медиа JPEG <=500 КБ + RBAC (16 ч), UI загрузки у мастера (16 ч), галерея у клиента (12 ч).`n• F16 Напоминания о ТО (приоритет 25, 30 ч): серверный планировщик и Push (14 ч), карточка и настройки в гараже (16 ч).`nПересчёт (План v2.5, 1 Senior): 316 - 14 (F13) + 44 + 30 = 376 ч -> нужно 6 итераций (12 недель, до 12.02.2027), стоимость `$13,160 (+`$2,100 к Плану v2). Предлагаю сдвинуть дедлайн на 2 недели." },
-    @{ role="cust"; sender="Заказчик (Мороз А. А., гр. 434701)"; time="20.11, 09:20"; text="Сдвигать дедлайн КАТЕГОРИЧЕСКИ нельзя! 1 февраля 2027 у нас открытие 4-го бокса и оплаченная реклама – релиз строго 29.01.2027 (5 итераций). И платить на `$2,100 больше я тоже не согласен – максимум могу добавить до +`$500-`$700 (бюджет до `$11,800). Как уложиться?" },
-    @{ role="exec"; sender="Исполнитель (Архитектор ПО – Кожемякин В. О., гр. 434701)"; time="20.11, 11:30"; text="Предлагаю подключить Junior-разработчика C++/QML (`$12/ч) со 2-й итерации (ADR-0006)! В Итерации 1 я готовлю фундамент (F01-F02) и контракты API/ViewModel, далее оставляю за собой всю критичную архитектуру (ACID F06, NHTSA, медиа-бэкенд, планировщик ТО, Push), а Junior забирает 9 изолированных UI/CRUD-задач (F03, F08.2, F09.2, F10.2, F11, F14, F15.2-3, F16.2). В план заложены честный коэффициент скорости Junior x1.20-1.25 (150 ч) и 24 ч моего времени на онбординг и код-ревью.`nИтог (Согласованный План v3):`n• Срок: ровно 5 итераций (10 нед., до 29.01.2027 – дедлайн сохранён!);`n• Стоимость: 278 ч Senior (`$9,730) + 150 ч Junior (`$1,800) = `$11,530 (всего +`$470 / +4.25% к Плану v2 и на `$1,630 дешевле варианта без Junior!)." },
-    @{ role="cust"; sender="Заказчик (Мороз А. А., гр. 434701)"; time="20.11, 13:05"; text="Отличное решение! Дедлайн 29.01.2027 сохранён, бюджет `$11,530 полностью укладывается в мой лимит, а ваше код-ревью гарантирует качество. План v3 утверждаю, обновляйте SRS v0.2, SDD v1.0, ADR-0006 и публикуйте в GitHub!" }
-)
-Render-Chat "chat-round2.png" "Переписка по проекту AutoService – Раунд 2 (Новые требования, дедлайн и подключение Junior)" 'Участники: Кожемякин В. О. (Исполнитель) и Мороз А. А. (Заказчик, гр. 434701) | Итог: План v3 (5 итераций, $11,530)' $r2Msgs
-
-Write-Host "All B&W diagrams, color chart, and Moroz A.A. chats regenerated!"
+Write-Host "All B&W no-fill UML/ER diagrams and color comparison chart regenerated!"
